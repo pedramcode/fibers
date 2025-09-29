@@ -36,7 +36,7 @@ pub mod tests {
         let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
         let mut rng = Box::new(rand::rng());
         let mut f = Fiber::new(&mut mem, &mut rng).unwrap();
-        for _ in 0..10000 {
+        for _ in 0..10000000 {
             f.push(&mut mem, 1).unwrap();
         }
     }

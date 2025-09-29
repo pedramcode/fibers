@@ -3,7 +3,7 @@ use crate::{execptions::MachineError, fiber::fiber::{Fiber, Reg}, memory::memory
 impl Fiber {
     pub fn push(&mut self, mem: &mut Memory, data: u64) -> Result<(), MachineError> {
         if self.get_register(mem, Reg::SP)? as usize > self.stack.size {
-            if self.stack.size > 256 * 1024 {
+            if self.stack.size > 1 * 1024 * 1024 {
                 return Err(MachineError::StackOverflow);
             }
             let prev_stack = self.stack.clone();

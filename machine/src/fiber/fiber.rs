@@ -44,7 +44,7 @@ impl Fiber {
                 r6: mem.allocate(8)?,
                 r7: mem.allocate(8)?,
             },
-            stack: mem.allocate(8 * 1024)?, // TODO are you sure 8 KB for each fiber?
+            stack: mem.allocate(8 * 1024)?,
             id: mem.allocate(8)?,
         };
         res.set_register(mem, Reg::PC, 0)?;
