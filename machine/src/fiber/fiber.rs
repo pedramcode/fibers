@@ -30,7 +30,7 @@ pub struct Fiber {
 
 impl Fiber {
     pub fn new(mem: &mut Memory, rng: &mut Box<rand::prelude::ThreadRng>) -> Result<Self, MachineError> {
-        let mut res = Self {
+        let res = Self {
             flag: mem.allocate(1)?,
             registers: Registers { 
                 pc: mem.allocate(8)?,
@@ -77,7 +77,7 @@ impl Fiber {
         Ok(())
     }
 
-    pub fn set_register(&mut self, mem: &mut Memory, reg: Reg, val: u64) -> Result<(), MachineError> {
+    pub fn set_register(&self, mem: &mut Memory, reg: Reg, val: u64) -> Result<(), MachineError> {
         match reg {
             Reg::R0 => mem.write_u64(self.registers.r0.address, val),
             Reg::R1 => mem.write_u64(self.registers.r1.address, val),
@@ -92,7 +92,7 @@ impl Fiber {
         }
     }
 
-    pub fn get_register(&mut self, mem: &Memory, reg: Reg) -> Result<u64, MachineError> {
+    pub fn get_register(&self, mem: &Memory, reg: Reg) -> Result<u64, MachineError> {
         match reg {
             Reg::R0 => mem.read_u64(self.registers.r0.address),
             Reg::R1 => mem.read_u64(self.registers.r1.address),
