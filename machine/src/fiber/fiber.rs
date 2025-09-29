@@ -1,6 +1,12 @@
 use crate::{execptions::MachineError, memory::{allocation::Pointer, memory::Memory}, utils};
 
 #[derive(Debug)]
+pub enum Reg {
+    PC, SP,
+    R0, R1, R2, R3, R4, R5, R6, R7,
+}
+
+#[derive(Debug)]
 pub struct Registers {
     pc: Pointer,
     sp: Pointer,
@@ -41,7 +47,8 @@ impl Fiber {
             stack: mem.allocate(8 * 1024)?, // TODO are you sure 8 KB for each fiber?
             id: mem.allocate(8)?,
         };
-        res.set_register(mem, 101, 0)?;
+        res.set_register(mem, Reg::PC, 0)?;
+        res.set_register(mem, Reg::SP, 0)?;
         mem.write_u64(res.id.address, utils::random::random_fiber_id(rng))?;
         Ok(res)
     }
@@ -70,35 +77,33 @@ impl Fiber {
         Ok(())
     }
 
-    pub fn set_register(&mut self, mem: &mut Memory, reg: u8, val: u64) -> Result<(), MachineError> {
+    pub fn set_register(&mut self, mem: &mut Memory, reg: Reg, val: u64) -> Result<(), MachineError> {
         match reg {
-            0 => mem.write_u64(self.registers.r0.address, val),
-            1 => mem.write_u64(self.registers.r1.address, val),
-            2 => mem.write_u64(self.registers.r2.address, val),
-            3 => mem.write_u64(self.registers.r3.address, val),
-            4 => mem.write_u64(self.registers.r4.address, val),
-            5 => mem.write_u64(self.registers.r5.address, val),
-            6 => mem.write_u64(self.registers.r6.address, val),
-            7 => mem.write_u64(self.registers.r7.address, val),
-            100 => mem.write_u64(self.registers.pc.address, val),
-            101 => mem.write_u64(self.registers.sp.address, val),
-            _ => Err(MachineError::InvalidRegister)
+            Reg::R0 => mem.write_u64(self.registers.r0.address, val),
+            Reg::R1 => mem.write_u64(self.registers.r1.address, val),
+            Reg::R2 => mem.write_u64(self.registers.r2.address, val),
+            Reg::R3 => mem.write_u64(self.registers.r3.address, val),
+            Reg::R4 => mem.write_u64(self.registers.r4.address, val),
+            Reg::R5 => mem.write_u64(self.registers.r5.address, val),
+            Reg::R6 => mem.write_u64(self.registers.r6.address, val),
+            Reg::R7 => mem.write_u64(self.registers.r7.address, val),
+            Reg::PC => mem.write_u64(self.registers.pc.address, val),
+            Reg::SP => mem.write_u64(self.registers.sp.address, val),
         }
     }
 
-    pub fn get_register(&mut self, mem: &Memory, reg: u8) -> Result<u64, MachineError> {
+    pub fn get_register(&mut self, mem: &Memory, reg: Reg) -> Result<u64, MachineError> {
         match reg {
-            0 => mem.read_u64(self.registers.r0.address),
-            1 => mem.read_u64(self.registers.r1.address),
-            2 => mem.read_u64(self.registers.r2.address),
-            3 => mem.read_u64(self.registers.r3.address),
-            4 => mem.read_u64(self.registers.r4.address),
-            5 => mem.read_u64(self.registers.r5.address),
-            6 => mem.read_u64(self.registers.r6.address),
-            7 => mem.read_u64(self.registers.r7.address),
-            100 => mem.read_u64(self.registers.pc.address),
-            101 => mem.read_u64(self.registers.sp.address),
-            _ => Err(MachineError::InvalidRegister)
+            Reg::R0 => mem.read_u64(self.registers.r0.address),
+            Reg::R1 => mem.read_u64(self.registers.r1.address),
+            Reg::R2 => mem.read_u64(self.registers.r2.address),
+            Reg::R3 => mem.read_u64(self.registers.r3.address),
+            Reg::R4 => mem.read_u64(self.registers.r4.address),
+            Reg::R5 => mem.read_u64(self.registers.r5.address),
+            Reg::R6 => mem.read_u64(self.registers.r6.address),
+            Reg::R7 => mem.read_u64(self.registers.r7.address),
+            Reg::PC => mem.read_u64(self.registers.pc.address),
+            Reg::SP => mem.read_u64(self.registers.sp.address),
         }
     }
 }

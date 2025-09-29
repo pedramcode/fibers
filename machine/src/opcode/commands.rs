@@ -1,15 +1,15 @@
-use crate::{execptions::MachineError, fiber::fiber::Fiber, memory::memory::Memory};
+use crate::{execptions::MachineError, fiber::fiber::{Fiber, Reg}, memory::memory::Memory};
 
 pub fn push(mem: &mut Memory, fib: &mut Fiber, value: u64) -> Result<(), MachineError> {
     fib.push(mem, value)
 }
 
-pub fn pop(mem: &mut Memory, fib: &mut Fiber, reg: u8) -> Result<(), MachineError> {
+pub fn pop(mem: &mut Memory, fib: &mut Fiber, reg: Reg) -> Result<(), MachineError> {
     let val = fib.pop(mem)?;
     fib.set_register(mem, reg, val)
 }
 
-pub fn mov(mem: &mut Memory, fib: &mut Fiber, reg: u8, num: u64) -> Result<(), MachineError> {
+pub fn mov(mem: &mut Memory, fib: &mut Fiber, reg: Reg, num: u64) -> Result<(), MachineError> {
     fib.set_register(mem, reg, num)
 }
 
