@@ -41,4 +41,13 @@ pub mod tests {
         commands::pop(&mut mem, &mut f, 0).unwrap();
         assert_eq!(f.get_register(&mem, 0).unwrap(), 3);
     }
+
+    #[test]
+    fn mov() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let mut f = Fiber::new(&mut mem, &mut rng).unwrap();
+        commands::mov(&mut mem, &mut f, 0, 1998).unwrap();
+        assert_eq!(f.get_register(&mem, 0).unwrap(), 1998);
+    }
 }
