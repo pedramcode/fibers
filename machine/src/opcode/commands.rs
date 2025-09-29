@@ -9,7 +9,7 @@ pub fn pop(mem: &mut Memory, fib: &mut Fiber, reg: Reg) -> Result<(), MachineErr
     fib.set_register(mem, reg, val)
 }
 
-pub fn mov(mem: &mut Memory, fib: &mut Fiber, reg: Reg, num: u64) -> Result<(), MachineError> {
+pub fn mov(mem: &mut Memory, fib: &Fiber, reg: Reg, num: u64) -> Result<(), MachineError> {
     fib.set_register(mem, reg, num)
 }
 
