@@ -7,6 +7,11 @@ pub enum Reg {
 }
 
 #[derive(Debug)]
+pub enum Flag {
+    Zero, Overflow, Negative, Carry,
+}
+
+#[derive(Debug)]
 pub struct Registers {
     pc: Pointer,
     sp: Pointer,
@@ -50,6 +55,7 @@ impl Fiber {
         res.set_register(mem, Reg::PC, 0)?;
         res.set_register(mem, Reg::SP, 0)?;
         mem.write_u64(res.id.address, utils::random::random_fiber_id(rng))?;
+        mem.write_u8(res.flag.address, 0)?;
         Ok(res)
     }
 
@@ -105,5 +111,39 @@ impl Fiber {
             Reg::PC => mem.read_u64(self.registers.pc.address),
             Reg::SP => mem.read_u64(self.registers.sp.address),
         }
+    }
+
+    pub fn get_flag(&self, mem: &Memory, flag: Flag) -> Result<bool, MachineError> {
+        let flags = mem.read_u8(self.flag.address)?;
+
+        let bit = match flag {
+            Flag::Zero => 0,
+            Flag::Overflow => 1,
+            Flag::Negative => 2,
+            Flag::Carry => 3,
+        };
+
+        Ok((flags >> bit) & 1 == 1)
+    }
+
+    pub fn set_flag(&self, mem: &mut Memory, flag: Flag, value: bool) -> Result<(), MachineError> {
+        let mut flags = mem.read_u8(self.flag.address)?;
+
+        let bit = match flag {
+            Flag::Zero => 0,
+            Flag::Overflow => 1,
+            Flag::Negative => 2,
+            Flag::Carry => 3,
+        };
+
+        if value {
+            flags |= 1 << bit;
+        } else {
+            flags &= !(1 << bit);
+        }
+
+        mem.write_u8(self.flag.address, flags)?;
+
+        Ok(())
     }
 }

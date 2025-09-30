@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod tests {
-    use machine::{fiber::fiber::Fiber, memory::memory::Memory};
+    use machine::{fiber::fiber::{Fiber, Flag}, memory::memory::Memory};
 
     #[test]
     fn initialize() {
@@ -28,12 +28,54 @@ pub mod tests {
 
     #[test]
     #[ignore]
-    pub fn brute_force() {
+    fn brute_force() {
         let mut mem = Memory::new(128 * 1024).unwrap();
         let mut rng = Box::new(rand::rng());
         for _ in 0..10000 {
             let f = Fiber::new(&mut mem, &mut rng).unwrap();
             f.kill(&mut mem).unwrap();
         }
+    }
+
+    #[test]
+    fn flags() {
+        let mut mem = Memory::new(128 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let f = Fiber::new(&mut mem, &mut rng).unwrap();
+        assert_eq!(f.get_flag(&mem, Flag::Zero).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Carry).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Overflow).unwrap(), false);
+
+        f.set_flag(&mut mem, Flag::Zero, true).unwrap();
+        assert_eq!(f.get_flag(&mem, Flag::Zero).unwrap(), true);
+        assert_eq!(f.get_flag(&mem, Flag::Carry).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Overflow).unwrap(), false);
+
+        f.set_flag(&mut mem, Flag::Overflow, true).unwrap();
+        assert_eq!(f.get_flag(&mem, Flag::Zero).unwrap(), true);
+        assert_eq!(f.get_flag(&mem, Flag::Carry).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Overflow).unwrap(), true);
+
+        f.set_flag(&mut mem, Flag::Zero, false).unwrap();
+        assert_eq!(f.get_flag(&mem, Flag::Zero).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Carry).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Overflow).unwrap(), true);
+        
+        f.set_flag(&mut mem, Flag::Carry, true).unwrap();
+        f.set_flag(&mut mem, Flag::Negative, true).unwrap();
+        assert_eq!(f.get_flag(&mem, Flag::Zero).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Carry).unwrap(), true);
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), true);
+        assert_eq!(f.get_flag(&mem, Flag::Overflow).unwrap(), true);
+
+        f.set_flag(&mut mem, Flag::Negative, false).unwrap();
+        assert_eq!(f.get_flag(&mem, Flag::Zero).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Carry).unwrap(), true);
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), false);
+        assert_eq!(f.get_flag(&mem, Flag::Overflow).unwrap(), true);
     }
 }
