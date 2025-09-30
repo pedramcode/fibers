@@ -20,4 +20,19 @@ pub mod tests {
         machine.kill(f3).unwrap();
         machine.kill(f4).unwrap();
     }
+
+    #[test]
+    #[ignore]
+    fn spawn_many() {
+        let mut machine = Machine::new(128 * 1024 * 1024).unwrap();
+        let mut fibers: Vec<u64> = Vec::new();
+        let range = 0..1000;
+        for _ in range.clone() {
+            let id = machine.spawn().unwrap();
+            fibers.push(id);
+        }
+        for i in range.clone() {
+            machine.kill(fibers[i]).unwrap();
+        }
+    }
 }

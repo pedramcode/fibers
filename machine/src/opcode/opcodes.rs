@@ -25,4 +25,5 @@ pub enum Opcodes {
     SHL = 0x0017,
     ROL = 0x0018,
     ROR = 0x0019,
+    HLT = 0x001a,
 }
