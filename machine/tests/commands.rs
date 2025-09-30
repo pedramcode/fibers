@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod tests {
-    use machine::{fiber::fiber::{Fiber, Flag, Reg}, memory::memory::Memory, opcode::commands};
+    use machine::{fiber::{fiber::{Fiber, Flag, Reg}}, memory::memory::Memory, opcode::commands};
 
     #[test]
     fn pushpop() {
@@ -118,5 +118,30 @@ pub mod tests {
         commands::pop(&mut mem, &mut f, Reg::R1).unwrap();
         assert_eq!(f.get_register(&mem, Reg::R0).unwrap(), 1);
         assert_eq!(f.get_register(&mem, Reg::R1).unwrap(), 2);
+    }
+
+    #[test]
+    fn incdec() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let f = Fiber::new(&mut mem, &mut rng).unwrap();
+        commands::inc(&mut mem, &f, Reg::R0).unwrap();
+        commands::inc(&mut mem, &f, Reg::R0).unwrap();
+        commands::inc(&mut mem, &f, Reg::R0).unwrap();
+        commands::inc(&mut mem, &f, Reg::R0).unwrap();
+        commands::inc(&mut mem, &f, Reg::R0).unwrap();
+        assert_eq!(f.get_register(&mem, Reg::R0).unwrap(), 5);
+        commands::dec(&mut mem, &f, Reg::R0).unwrap();
+        commands::dec(&mut mem, &f, Reg::R0).unwrap();
+        assert_eq!(f.get_register(&mem, Reg::R0).unwrap(), 3);
+    }
+
+    #[test]
+    fn decovf() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let f = Fiber::new(&mut mem, &mut rng).unwrap();
+        commands::dec(&mut mem, &f, Reg::R0).unwrap();
+        assert_eq!(f.get_register(&mem, Reg::R0).unwrap(), u64::MAX);
     }
 }

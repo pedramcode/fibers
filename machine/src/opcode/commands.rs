@@ -52,3 +52,15 @@ pub fn dup(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
 pub fn swap(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
     fib.swap(mem)
 }
+
+pub fn inc(mem: &mut Memory, fib: &Fiber, reg: Reg) -> Result<(), MachineError> {
+    let val = fib.get_register(mem, reg.clone())?;
+    let res = val.wrapping_add(1);
+    fib.set_register(mem, reg, res)
+}
+
+pub fn dec(mem: &mut Memory, fib: &Fiber, reg: Reg) -> Result<(), MachineError> {
+    let val = fib.get_register(mem, reg.clone())?;
+    let res = val.wrapping_sub(1);
+    fib.set_register(mem, reg, res)
+}

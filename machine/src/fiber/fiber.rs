@@ -1,6 +1,6 @@
 use crate::{execptions::MachineError, fiber::section::Section, memory::{allocation::Pointer, memory::Memory}, utils};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Reg {
     PC, SP,
     R0, R1, R2, R3, R4, R5, R6, R7,
