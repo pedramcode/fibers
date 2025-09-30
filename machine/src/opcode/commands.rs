@@ -131,3 +131,44 @@ pub fn jle(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineE
     }
     Ok(())
 }
+
+pub fn and(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = fib.pop(mem)?;
+    let c = a & b;
+    fib.push(mem, c)
+}
+
+pub fn or(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = fib.pop(mem)?;
+    let c = a | b;
+    fib.push(mem, c)
+}
+
+pub fn not(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = !a;
+    fib.push(mem, b)
+}
+
+pub fn xor(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = fib.pop(mem)?;
+    let c = a ^ b;
+    fib.push(mem, c)
+}
+
+pub fn shl(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = fib.pop(mem)?;
+    let c = a << b;
+    fib.push(mem, c)
+}
+
+pub fn shr(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = fib.pop(mem)?;
+    let c = a >> b;
+    fib.push(mem, c)
+}
