@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod tests {
-    use machine::{fiber::fiber::{Fiber, Reg}, memory::memory::Memory, opcode::commands};
+    use machine::{fiber::fiber::{Fiber, Flag, Reg}, memory::memory::Memory, opcode::commands};
 
     #[test]
     fn pushpop() {
@@ -40,6 +40,7 @@ pub mod tests {
         commands::sub(&mut mem, &mut f).unwrap();
         commands::pop(&mut mem, &mut f, Reg::R0).unwrap();
         assert_eq!(f.get_register(&mem, Reg::R0).unwrap(), 3);
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), false);
     }
 
     #[test]
@@ -49,5 +50,16 @@ pub mod tests {
         let mut f = Fiber::new(&mut mem, &mut rng).unwrap();
         commands::mov(&mut mem, &mut f, Reg::R0, 1998).unwrap();
         assert_eq!(f.get_register(&mem, Reg::R0).unwrap(), 1998);
+    }
+
+    #[test]
+    fn sub_neg() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let mut f = Fiber::new(&mut mem, &mut rng).unwrap();
+        commands::push(&mut mem, &mut f, 6).unwrap();
+        commands::push(&mut mem, &mut f, 3).unwrap();
+        commands::sub(&mut mem, &mut f).unwrap();
+        assert_eq!(f.get_flag(&mem, Flag::Negative).unwrap(), true);
     }
 }
