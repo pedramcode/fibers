@@ -172,3 +172,17 @@ pub fn shr(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
     let c = a >> b;
     fib.push(mem, c)
 }
+
+pub fn rol(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = fib.pop(mem)?;
+    let c = a.rotate_left(b as u32);
+    fib.push(mem, c)
+}
+
+pub fn ror(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let a = fib.pop(mem)?;
+    let b = fib.pop(mem)?;
+    let c = a.rotate_right(b as u32);
+    fib.push(mem, c)
+}
