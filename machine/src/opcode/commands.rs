@@ -1,4 +1,4 @@
-use crate::{execptions::MachineError, fiber::fiber::{Fiber, Reg}, memory::memory::Memory};
+use crate::{execptions::MachineError, fiber::fiber::{Fiber, Flag, Reg}, memory::memory::Memory};
 
 pub fn push(mem: &mut Memory, fib: &mut Fiber, value: u64) -> Result<(), MachineError> {
     fib.push(mem, value)
@@ -14,15 +14,25 @@ pub fn mov(mem: &mut Memory, fib: &Fiber, reg: Reg, num: u64) -> Result<(), Mach
 }
 
 pub fn add(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
-    let a = fib.pop(mem)?;
-    let b = fib.pop(mem)?;
-    let c = a + b;
-    fib.push(mem, c)
+    let a = fib.pop(mem)? as i64;
+    let b = fib.pop(mem)? as i64;
+    let c = a.wrapping_add(b);
+    fib.set_flag(mem, Flag::Zero, c == 0)?;
+    fib.set_flag(mem, Flag::Negative, c < 0)?;
+    fib.set_flag(mem, Flag::Overflow, (a > 0 && b > 0 && c < 0) || (a < 0 && b < 0 && c > 0))?;
+    let carry = (a as u64).overflowing_add(b as u64).1;
+    fib.set_flag(mem, Flag::Carry, carry)?;
+    fib.push(mem, c as u64)
 }
 
 pub fn sub(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
-    let a = fib.pop(mem)?;
-    let b = fib.pop(mem)?;
-    let c = a - b;
-    fib.push(mem, c)
+    let a = fib.pop(mem)? as i64;
+    let b = fib.pop(mem)? as i64;
+    let c = a.wrapping_sub(b);
+    fib.set_flag(mem, Flag::Zero, c == 0)?;
+    fib.set_flag(mem, Flag::Negative, c < 0)?;
+    fib.set_flag(mem, Flag::Overflow, (a > 0 && b < 0 && c < 0) || (a < 0 && b > 0 && c > 0))?;
+    let borrow = (a as u64).overflowing_sub(b as u64).1;
+    fib.set_flag(mem, Flag::Carry, !borrow)?;
+    fib.push(mem, c as u64)
 }
