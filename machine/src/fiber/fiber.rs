@@ -1,4 +1,4 @@
-use crate::{execptions::MachineError, fiber::section::Section, memory::{self, allocation::Pointer, memory::Memory}, opcode::{commands, opcodes::Opcodes}, utils};
+use crate::{execptions::MachineError, fiber::section::Section, memory::{allocation::Pointer, memory::Memory}, opcode::{commands, opcodes::Opcodes}, utils};
 
 #[derive(Debug, Clone)]
 pub enum Reg {

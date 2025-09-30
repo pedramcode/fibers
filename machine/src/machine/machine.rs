@@ -1,6 +1,6 @@
 use core::panic;
 
-use crate::{execptions::MachineError, fiber::fiber::{Fiber, FiberState}, memory::{self, memory::Memory}};
+use crate::{execptions::MachineError, fiber::fiber::{Fiber, FiberState}, memory::{memory::Memory}};
 
 pub struct Machine {
     mem: Memory,
