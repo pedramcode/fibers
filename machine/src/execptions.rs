@@ -7,4 +7,7 @@ pub enum MachineError {
     StackUnderflow,
     InvalidRegister,
     InvalidOpcode(Option<String>),
+    InvalidFiberState,
+    InvalidBytecodeDataType,
+    InvalidFiber,
 }

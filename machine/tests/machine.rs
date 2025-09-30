@@ -35,4 +35,23 @@ pub mod tests {
             machine.kill(fibers[i]).unwrap();
         }
     }
+
+    #[test]
+    fn load_bytecode() {
+        let mut machine = Machine::new(128 * 1024 * 1024).unwrap();
+        let fid = machine.spawn().unwrap();
+        // PUSH 10
+        // PUSH 20
+        // ADD
+        // POP R0
+        // HALT
+        machine.write_bytecodes(fid, &[
+            1, 1, 3, 10,
+            1, 1, 3, 20,
+            1, 4,
+            1, 2, 0, 0,
+            1, 26,
+        ]).unwrap();
+        machine.execute().unwrap();
+    }
 }

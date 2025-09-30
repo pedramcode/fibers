@@ -29,6 +29,24 @@ pub enum Flag {
     Zero, Overflow, Negative, Carry,
 }
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum FiberState {
+    RUNNING = 0x00,
+    HALTED = 0x01,
+    BLOCKED = 0x02,
+}
+
+impl FiberState {
+    pub fn from_u8(val: u8) -> Result<Self, MachineError> {
+        match val {
+            0x00 => Ok(Self::RUNNING),
+            0x01 => Ok(Self::HALTED),
+            0x02 => Ok(Self::BLOCKED),
+            _ => Err(MachineError::InvalidFiberState)
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Registers {
     pc: Pointer,
@@ -51,6 +69,7 @@ pub struct Fiber {
     pub(crate) stack: Pointer,
     pub(crate) text_section: Section,
     pub(crate) data_section: Section,
+    pub(crate) state: Pointer,
 }
 
 impl Fiber {
@@ -73,6 +92,7 @@ impl Fiber {
             id: mem.allocate(8)?,
             text_section: Section::new(mem)?,
             data_section: Section::new(mem)?,
+            state: mem.allocate(1)?,
         };
         res.set_register(mem, Reg::PC, 0)?;
         res.set_register(mem, Reg::SP, 0)?;
@@ -83,6 +103,15 @@ impl Fiber {
 
     pub fn get_id(&self, mem: &Memory) -> Result<u64, MachineError> {
         mem.read_u64(self.id.address)
+    }
+
+    pub fn set_state(&self, mem: &mut Memory, state: FiberState) -> Result<(), MachineError> {
+        mem.write_u8(self.state.address, state as u8)
+    }
+
+    pub fn get_state(&self, mem: &Memory) -> Result<FiberState, MachineError> {
+        let val = mem.read_u8(self.state.address)?;
+        FiberState::from_u8(val)
     }
 
     pub fn kill(&self, mem: &mut Memory) -> Result<(), MachineError> {
@@ -182,8 +211,10 @@ impl Fiber {
     }
 
     pub fn execute(&mut self, mem: &mut Memory) -> Result<(), MachineError> {
+        self.set_state(mem, FiberState::RUNNING)?;
         loop {
-            let instr = Opcodes::try_from(self.text_section.read_u16(mem, self.get_pc(mem)? as usize)?);
+            let opcode_read = self.text_section.read_u16(mem, self.get_pc(mem)? as usize)?;
+            let instr = Opcodes::try_from(opcode_read);
             if let Ok(opcode) = instr {
                 self.advance_pc(mem, 4)?;
                 match opcode {
@@ -288,11 +319,18 @@ impl Fiber {
                     Opcodes::ROR => {
                         commands::ror(mem, self)?;
                     },
-                    Opcodes::HLT => todo!(),
-                    Opcodes::YLD => todo!(),
+                    Opcodes::HLT => {
+                        self.set_state(mem, FiberState::HALTED)?;
+                        return Ok(());
+                    },
+                    Opcodes::YLD => {
+                        self.set_state(mem, FiberState::BLOCKED)?;
+                        return Ok(());
+                    },
                 }
             } else {
-                return Err(MachineError::InvalidOpcode(None));
+                self.set_state(mem, FiberState::HALTED)?;
+                return Err(MachineError::InvalidOpcode(Some(format!("opcode: {} at #{:x}", opcode_read, self.get_pc(mem)?).to_string())));
             }
         }
     }
