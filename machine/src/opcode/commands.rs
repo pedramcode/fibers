@@ -37,3 +37,14 @@ pub fn sub(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
     fib.set_flag(mem, Flag::Carry, !borrow)?;
     fib.push(mem, c as u64)
 }
+
+pub fn drop(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let val = fib.pop(mem)?;
+    fib.set_flag(mem, Flag::Zero, val == 0)?;
+    Ok(())
+}
+
+pub fn dup(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    let val = fib.peek(mem)?;
+    fib.push(mem, val)
+}

@@ -34,4 +34,12 @@ impl Fiber {
         self.push(mem, v2)?;
         Ok(())
     }
+
+    pub fn peek(&self, mem: &Memory) -> Result<u64, MachineError> {
+        if self.get_register(mem, Reg::SP)? as usize == 0 {
+            return Err(MachineError::StackUnderflow);
+        }
+        let val = mem.read_u64(self.stack.address + (self.get_register(mem, Reg::SP)? as usize - 8))?;
+        Ok(val)
+    }
 }

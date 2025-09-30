@@ -31,6 +31,29 @@ pub mod tests {
     }
 
     #[test]
+    fn peek() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let mut f = Fiber::new(&mut mem, &mut rng).unwrap();
+        f.push(&mut mem, 1).unwrap();
+        f.push(&mut mem, 2).unwrap();
+        assert_eq!(f.peek(&mut mem).unwrap(), 2);
+        assert_eq!(f.peek(&mut mem).unwrap(), 2);
+        assert_eq!(f.peek(&mut mem).unwrap(), 2);
+        assert_eq!(f.pop(&mut mem).unwrap(), 2);
+        assert_eq!(f.peek(&mut mem).unwrap(), 1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn peek_empty() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let f = Fiber::new(&mut mem, &mut rng).unwrap();
+        f.peek(&mut mem).unwrap();
+    }
+
+    #[test]
     #[should_panic]
     fn stackoverflow() {
         let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
