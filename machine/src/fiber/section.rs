@@ -2,8 +2,8 @@ use crate::{execptions::MachineError, memory::{allocation::Pointer, memory::Memo
 
 #[derive(Debug)]
 pub struct Section {
-    dp: Pointer, // data pointer
-    data: Pointer,
+    pub(crate) dp: Pointer, // data pointer
+    pub(crate) data: Pointer,
 }
 
 pub trait MemoryMan {

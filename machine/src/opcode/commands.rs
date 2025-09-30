@@ -64,3 +64,70 @@ pub fn dec(mem: &mut Memory, fib: &Fiber, reg: Reg) -> Result<(), MachineError> 
     let res = val.wrapping_sub(1);
     fib.set_register(mem, reg, res)
 }
+
+pub fn jmp(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineError> {
+    if address < fib.text_section.data.address || address >= fib.text_section.data.address + fib.text_section.data.size {
+        return Err(MachineError::InvalidAddress(None));
+    }
+    fib.set_register(mem, Reg::PC, address as u64)
+}
+
+pub fn jnz(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineError> {
+    if address < fib.text_section.data.address || address >= fib.text_section.data.address + fib.text_section.data.size {
+        return Err(MachineError::InvalidAddress(None));
+    }
+    if !fib.get_flag(mem, Flag::Zero)? {
+        return fib.set_register(mem, Reg::PC, address as u64);
+    }
+    Ok(())
+}
+
+pub fn jz(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineError> {
+    if address < fib.text_section.data.address || address >= fib.text_section.data.address + fib.text_section.data.size {
+        return Err(MachineError::InvalidAddress(None));
+    }
+    if fib.get_flag(mem, Flag::Zero)? {
+        return fib.set_register(mem, Reg::PC, address as u64);
+    }
+    Ok(())
+}
+
+pub fn jg(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineError> {
+    if address < fib.text_section.data.address || address >= fib.text_section.data.address + fib.text_section.data.size {
+        return Err(MachineError::InvalidAddress(None));
+    }
+    if !fib.get_flag(mem, Flag::Zero)? && (fib.get_flag(mem, Flag::Negative)? == fib.get_flag(mem, Flag::Overflow)?) {
+        return fib.set_register(mem, Reg::PC, address as u64);
+    }
+    Ok(())
+}
+
+pub fn jge(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineError> {
+    if address < fib.text_section.data.address || address >= fib.text_section.data.address + fib.text_section.data.size {
+        return Err(MachineError::InvalidAddress(None));
+    }
+    if fib.get_flag(mem, Flag::Negative)? == fib.get_flag(mem, Flag::Overflow)? {
+        return fib.set_register(mem, Reg::PC, address as u64);
+    }
+    Ok(())
+}
+
+pub fn jl(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineError> {
+    if address < fib.text_section.data.address || address >= fib.text_section.data.address + fib.text_section.data.size {
+        return Err(MachineError::InvalidAddress(None));
+    }
+    if fib.get_flag(mem, Flag::Negative)? != fib.get_flag(mem, Flag::Overflow)? {
+        return fib.set_register(mem, Reg::PC, address as u64);
+    }
+    Ok(())
+}
+
+pub fn jle(mem: &mut Memory, fib: &Fiber, address: usize) -> Result<(), MachineError> {
+    if address < fib.text_section.data.address || address >= fib.text_section.data.address + fib.text_section.data.size {
+        return Err(MachineError::InvalidAddress(None));
+    }
+    if fib.get_flag(mem, Flag::Zero)? || (fib.get_flag(mem, Flag::Negative)? != fib.get_flag(mem, Flag::Overflow)?) {
+        return fib.set_register(mem, Reg::PC, address as u64);
+    }
+    Ok(())
+}
