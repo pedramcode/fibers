@@ -6,6 +6,7 @@ pub fn push(mem: &mut Memory, fib: &mut Fiber, value: u64) -> Result<(), Machine
 
 pub fn pop(mem: &mut Memory, fib: &mut Fiber, reg: Reg) -> Result<(), MachineError> {
     let val = fib.pop(mem)?;
+    fib.set_flag(mem, Flag::Zero, val == 0)?;
     fib.set_register(mem, reg, val)
 }
 
