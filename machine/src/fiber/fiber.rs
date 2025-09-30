@@ -1,4 +1,4 @@
-use crate::{execptions::MachineError, memory::{allocation::Pointer, memory::Memory}, utils};
+use crate::{execptions::MachineError, fiber::section::Section, memory::{allocation::Pointer, memory::Memory}, utils};
 
 #[derive(Debug)]
 pub enum Reg {
@@ -31,6 +31,7 @@ pub struct Fiber {
     pub(crate) registers: Registers,
     pub(crate) flag: Pointer,
     pub(crate) stack: Pointer,
+    pub(crate) text_section: Section,
 }
 
 impl Fiber {
@@ -51,6 +52,7 @@ impl Fiber {
             },
             stack: mem.allocate(4 * 1024)?,
             id: mem.allocate(8)?,
+            text_section: Section::new(mem)?,
         };
         res.set_register(mem, Reg::PC, 0)?;
         res.set_register(mem, Reg::SP, 0)?;
@@ -75,6 +77,8 @@ impl Fiber {
         mem.deallocate(&self.registers.r5)?;
         mem.deallocate(&self.registers.r6)?;
         mem.deallocate(&self.registers.r7)?;
+        // deallocate sections
+        self.text_section.free(mem)?;
         // dellocate other
         mem.deallocate(&self.stack)?;
         mem.deallocate(&self.flag)?;
