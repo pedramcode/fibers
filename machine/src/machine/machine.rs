@@ -1,6 +1,6 @@
 use core::panic;
 
-use crate::{execptions::MachineError, fiber::fiber::{Fiber, FiberState}, memory::memory::Memory};
+use crate::{execptions::MachineError, fiber::fiber::{Fiber, FiberState}, memory::{self, memory::Memory}};
 
 pub struct Machine {
     mem: Memory,
@@ -32,10 +32,10 @@ impl Machine {
         }) {
             for pair in bytecodes.chunks(2) {
                 match pair[0] {
-                    0 => self.fibers[idx].data_section.append_data::<u8>(&mut self.mem, pair[1] as u8)?,
-                    1 => self.fibers[idx].data_section.append_data::<u16>(&mut self.mem, pair[1] as u16)?,
-                    2 => self.fibers[idx].data_section.append_data::<u32>(&mut self.mem, pair[1] as u32)?,
-                    3 => self.fibers[idx].data_section.append_data::<u64>(&mut self.mem, pair[1] as u64)?,
+                    0 => self.fibers[idx].text_section.append_data::<u8>(&mut self.mem, pair[1] as u8)?,
+                    1 => self.fibers[idx].text_section.append_data::<u16>(&mut self.mem, pair[1] as u16)?,
+                    2 => self.fibers[idx].text_section.append_data::<u32>(&mut self.mem, pair[1] as u32)?,
+                    3 => self.fibers[idx].text_section.append_data::<u64>(&mut self.mem, pair[1] as u64)?,
                     _ => return Err(MachineError::InvalidBytecodeDataType),
                 };
             }

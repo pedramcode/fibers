@@ -1,4 +1,4 @@
-use crate::{execptions::MachineError, fiber::section::Section, memory::{allocation::Pointer, memory::Memory}, opcode::{commands, opcodes::Opcodes}, utils};
+use crate::{execptions::MachineError, fiber::section::Section, memory::{self, allocation::Pointer, memory::Memory}, opcode::{commands, opcodes::Opcodes}, utils};
 
 #[derive(Debug, Clone)]
 pub enum Reg {
@@ -214,13 +214,14 @@ impl Fiber {
         self.set_state(mem, FiberState::RUNNING)?;
         loop {
             let opcode_read = self.text_section.read_u16(mem, self.get_pc(mem)? as usize)?;
+            self.advance_pc(mem, 2)?;
             let instr = Opcodes::try_from(opcode_read);
             if let Ok(opcode) = instr {
-                self.advance_pc(mem, 4)?;
                 match opcode {
                     Opcodes::PUSH => {
                         let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
                         self.advance_pc(mem, 8)?;
+                        println!("------------------------------------ {:b}", val);
                         commands::push(mem, self, val)?;
                     },
                     Opcodes::POP => {

@@ -46,8 +46,8 @@ pub mod tests {
         // POP R0
         // HALT
         machine.write_bytecodes(fid, &[
-            1, 1, 3, 10,
-            1, 1, 3, 20,
+            1, 1, 3, 65,
+            1, 1, 3, 66,
             1, 4,
             1, 2, 0, 0,
             1, 26,

@@ -67,4 +67,23 @@ pub mod tests {
         assert_eq!(s.read_offset::<u64>(&mem, 2).unwrap(), 30);
         assert_eq!(s.read_offset::<u64>(&mem, 3).unwrap(), 40);
     }
+
+    #[test]
+    fn read_write() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let s = Section::new(&mut mem).unwrap();
+        s.append_data(&mut mem, 10u8).unwrap();
+        s.append_data(&mut mem, 11u16).unwrap();
+        s.append_data(&mut mem, 15u8).unwrap();
+        s.append_data(&mut mem, 12u32).unwrap();
+        s.append_data(&mut mem, 13u64).unwrap();
+        s.append_data(&mut mem, 23u16).unwrap();
+        assert_eq!(s.read_u8(&mem, 0).unwrap(), 10);
+        assert_eq!(s.read_u16(&mem, 1).unwrap(), 11);
+        assert_eq!(s.read_u8(&mem, 3).unwrap(), 15);
+        assert_eq!(s.read_u32(&mem, 4).unwrap(), 12);
+        assert_eq!(s.read_u64(&mem, 8).unwrap(), 13);
+        assert_eq!(s.read_u16(&mem, 16).unwrap(), 23);
+
+    }
 }
