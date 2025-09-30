@@ -48,3 +48,7 @@ pub fn dup(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
     let val = fib.peek(mem)?;
     fib.push(mem, val)
 }
+
+pub fn swap(mem: &mut Memory, fib: &mut Fiber) -> Result<(), MachineError> {
+    fib.swap(mem)
+}

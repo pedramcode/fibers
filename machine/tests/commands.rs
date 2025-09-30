@@ -105,4 +105,18 @@ pub mod tests {
         let mut f = Fiber::new(&mut mem, &mut rng).unwrap();
         commands::drop(&mut mem, &mut f).unwrap();
     }
+
+    #[test]
+    fn swap() {
+        let mut mem = Memory::new(8 * 1024 * 1024).unwrap();
+        let mut rng = Box::new(rand::rng());
+        let mut f = Fiber::new(&mut mem, &mut rng).unwrap();
+        commands::push(&mut mem, &mut f, 1).unwrap();
+        commands::push(&mut mem, &mut f, 2).unwrap();
+        commands::swap(&mut mem, &mut f).unwrap();
+        commands::pop(&mut mem, &mut f, Reg::R0).unwrap();
+        commands::pop(&mut mem, &mut f, Reg::R1).unwrap();
+        assert_eq!(f.get_register(&mem, Reg::R0).unwrap(), 1);
+        assert_eq!(f.get_register(&mem, Reg::R1).unwrap(), 2);
+    }
 }
