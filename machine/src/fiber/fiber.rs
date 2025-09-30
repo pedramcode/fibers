@@ -32,6 +32,7 @@ pub struct Fiber {
     pub(crate) flag: Pointer,
     pub(crate) stack: Pointer,
     pub(crate) text_section: Section,
+    pub(crate) data_section: Section,
 }
 
 impl Fiber {
@@ -53,6 +54,7 @@ impl Fiber {
             stack: mem.allocate(4 * 1024)?,
             id: mem.allocate(8)?,
             text_section: Section::new(mem)?,
+            data_section: Section::new(mem)?,
         };
         res.set_register(mem, Reg::PC, 0)?;
         res.set_register(mem, Reg::SP, 0)?;
@@ -79,6 +81,7 @@ impl Fiber {
         mem.deallocate(&self.registers.r7)?;
         // deallocate sections
         self.text_section.free(mem)?;
+        self.data_section.free(mem)?;
         // dellocate other
         mem.deallocate(&self.stack)?;
         mem.deallocate(&self.flag)?;
