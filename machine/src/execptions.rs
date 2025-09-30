@@ -6,4 +6,5 @@ pub enum MachineError {
     StackOverflow,
     StackUnderflow,
     InvalidRegister,
+    InvalidOpcode(Option<String>),
 }

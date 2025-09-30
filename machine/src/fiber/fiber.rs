@@ -1,9 +1,27 @@
-use crate::{execptions::MachineError, fiber::section::Section, memory::{allocation::Pointer, memory::Memory}, utils};
+use crate::{execptions::MachineError, fiber::section::Section, memory::{allocation::Pointer, memory::Memory}, opcode::{commands, opcodes::Opcodes}, utils};
 
 #[derive(Debug, Clone)]
 pub enum Reg {
     PC, SP,
     R0, R1, R2, R3, R4, R5, R6, R7,
+}
+
+impl Reg {
+    pub fn from_u8(val: u8) -> Result<Self, MachineError> {
+        match val {
+            0 => Ok(Self::R0),
+            1 => Ok(Self::R1),
+            2 => Ok(Self::R2),
+            3 => Ok(Self::R3),
+            4 => Ok(Self::R4),
+            5 => Ok(Self::R5),
+            6 => Ok(Self::R6),
+            7 => Ok(Self::R7),
+            100 => Ok(Self::PC),
+            101 => Ok(Self::SP),
+            _ => Err(MachineError::InvalidRegister),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -152,5 +170,130 @@ impl Fiber {
         mem.write_u8(self.flag.address, flags)?;
 
         Ok(())
+    }
+
+    fn advance_pc(&self, mem: &mut Memory, step: u64) -> Result<(), MachineError> {
+        let cur = self.get_register(&mem, Reg::PC)?;
+        self.set_register(mem, Reg::PC, cur + step)
+    }
+
+    fn get_pc(&self, mem: &Memory) -> Result<u64, MachineError> {
+        self.get_register(&mem, Reg::PC)
+    }
+
+    pub fn execute(&mut self, mem: &mut Memory) -> Result<(), MachineError> {
+        loop {
+            let instr = Opcodes::try_from(self.text_section.read_u16(mem, self.get_pc(mem)? as usize)?);
+            if let Ok(opcode) = instr {
+                self.advance_pc(mem, 4)?;
+                match opcode {
+                    Opcodes::PUSH => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::push(mem, self, val)?;
+                    },
+                    Opcodes::POP => {
+                        let reg = self.text_section.read_u8(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 1)?;
+                        commands::pop(mem, self, Reg::from_u8(reg)?)?;
+                    },
+                    Opcodes::MOV => {
+                        let reg = self.text_section.read_u8(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 1)?;
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::mov(mem, self, Reg::from_u8(reg)?, val)?;
+                    },
+                    Opcodes::ADD => {
+                        commands::add(mem, self)?;
+                    },
+                    Opcodes::SUB => {
+                        commands::sub(mem, self)?;
+                    },
+                    Opcodes::DROP => {
+                        commands::drop(mem, self)?;
+                    },
+                    Opcodes::DUP => {
+                        commands::dup(mem, self)?;
+                    },
+                    Opcodes::SWP => {
+                        commands::swap(mem, self)?;
+                    },
+                    Opcodes::INC => {
+                        let reg = self.text_section.read_u8(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 1)?;
+                        commands::inc(mem, self, Reg::from_u8(reg)?)?;
+                    },
+                    Opcodes::DEC => {
+                        let reg = self.text_section.read_u8(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 1)?;
+                        commands::dec(mem, self, Reg::from_u8(reg)?)?;
+                    },
+                    Opcodes::JMP => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::jmp(mem, self, val as usize)?;
+                    },
+                    Opcodes::JZ => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::jz(mem, self, val as usize)?;
+                    },
+                    Opcodes::JNZ => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::jnz(mem, self, val as usize)?;
+                    },
+                    Opcodes::JG => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::jg(mem, self, val as usize)?;
+                    },
+                    Opcodes::JGE => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::jge(mem, self, val as usize)?;
+                    },
+                    Opcodes::JL => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::jl(mem, self, val as usize)?;
+                    },
+                    Opcodes::JLE => {
+                        let val = self.text_section.read_u64(mem, self.get_pc(mem)? as usize)?;
+                        self.advance_pc(mem, 8)?;
+                        commands::jle(mem, self, val as usize)?;
+                    },
+                    Opcodes::AND => {
+                        commands::and(mem, self)?;
+                    },
+                    Opcodes::OR => {
+                        commands::or(mem, self)?;
+                    },
+                    Opcodes::NOT => {
+                        commands::not(mem, self)?;
+                    },
+                    Opcodes::XOR => {
+                        commands::xor(mem, self)?;
+                    },
+                    Opcodes::SHR => {
+                        commands::shr(mem, self)?;
+                    },
+                    Opcodes::SHL => {
+                        commands::shl(mem, self)?;
+                    },
+                    Opcodes::ROL => {
+                        commands::rol(mem, self)?;
+                    },
+                    Opcodes::ROR => {
+                        commands::ror(mem, self)?;
+                    },
+                    Opcodes::HLT => todo!(),
+                    Opcodes::YLD => todo!(),
+                }
+            } else {
+                return Err(MachineError::InvalidOpcode(None));
+            }
+        }
     }
 }

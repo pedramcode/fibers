@@ -90,7 +90,23 @@ impl Section {
         Ok(())
     }
 
-    pub fn read_data<T: MemoryMan>(&self, mem: &Memory, offset: usize) -> Result<T, MachineError> {
+    pub fn read_offset<T: MemoryMan>(&self, mem: &Memory, offset: usize) -> Result<T, MachineError> {
         T::read_data(mem, self.data.address + offset * T::size_in_bytes())
+    }
+
+    pub fn read_u8(&self, mem: &Memory, address: usize) -> Result<u8, MachineError> {
+        mem.read_u8(self.data.address + address)
+    }
+
+    pub fn read_u16(&self, mem: &Memory, address: usize) -> Result<u16, MachineError> {
+        mem.read_u16(self.data.address + address)
+    }
+
+    pub fn read_u32(&self, mem: &Memory, address: usize) -> Result<u32, MachineError> {
+        mem.read_u32(self.data.address + address)
+    }
+
+    pub fn read_u64(&self, mem: &Memory, address: usize) -> Result<u64, MachineError> {
+        mem.read_u64(self.data.address + address)
     }
 }
